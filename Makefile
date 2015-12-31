@@ -1,4 +1,4 @@
-PREFIX?=$(shell pwd)
+SHELL := /bin/bash
 
 .DEFAULT: default
 
@@ -11,7 +11,7 @@ deps:
 	go get -t -v ./...
 
 fmt:
-	gofmt -s -l .
+	diff -u <(echo -n) <(gofmt -s -d .)
 
 install:
 	go install -v .
