@@ -1,5 +1,7 @@
 # finto
 
+[![Build Status](https://travis-ci.org/threadwaste/finto.svg?branch=master)](https://travis-ci.org/threadwaste/finto)
+
 **finto (-a)** /'finto (-a)/ *agg* **1** posticcio; artificiàle
 
 ## Overview
