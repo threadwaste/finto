@@ -124,25 +124,25 @@ func NewRoleSet(c AssumeRoleClient) *RoleSet {
 	}
 }
 
-func (rc *RoleSet) Role(alias string) (*Role, error) {
-	rc.m.Lock()
-	defer rc.m.Unlock()
+func (rs *RoleSet) Role(alias string) (*Role, error) {
+	rs.m.Lock()
+	defer rs.m.Unlock()
 
-	if role, ok := rc.roles[alias]; ok {
+	if role, ok := rs.roles[alias]; ok {
 		return role, nil
 	}
 
 	return &Role{}, fmt.Errorf("unknown role: %s", alias)
 }
 
-func (rc *RoleSet) Roles() (roles []string) {
-	rc.m.Lock()
-	defer rc.m.Unlock()
+func (rs *RoleSet) Roles() (roles []string) {
+	rs.m.Lock()
+	defer rs.m.Unlock()
 
-	roles = make([]string, len(rc.roles))
+	roles = make([]string, len(rs.roles))
 
 	i := 0
-	for k := range rc.roles {
+	for k := range rs.roles {
 		roles[i] = k
 		i += 1
 	}
@@ -152,9 +152,9 @@ func (rc *RoleSet) Roles() (roles []string) {
 }
 
 // Set an alias's role configuration.
-func (rc *RoleSet) SetRole(alias, arn string) {
-	rc.m.Lock()
-	defer rc.m.Unlock()
+func (rs *RoleSet) SetRole(alias, arn string) {
+	rs.m.Lock()
+	defer rs.m.Unlock()
 
-	rc.roles[alias] = NewRole(arn, fmt.Sprintf("finto-%s", alias), rc.client)
+	rs.roles[alias] = NewRole(arn, fmt.Sprintf("finto-%s", alias), rs.client)
 }
