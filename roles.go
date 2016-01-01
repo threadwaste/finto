@@ -1,11 +1,38 @@
-package roles
+package finto
 
 import (
+	"fmt"
+	"sort"
 	"sync"
+	"time"
 
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/service/sts"
 )
+
+// Credentials represents a set of temporary credentials and their expiration.
+type Credentials struct {
+	AccessKeyId     string
+	Expiration      time.Time
+	SecretAccessKey string
+	SessionToken    string
+}
+
+func (c *Credentials) IsExpired() bool {
+	return c.Expiration.Before(time.Now())
+}
+
+func (c *Credentials) SetCredentials(id, key, token string) {
+	c.AccessKeyId = id
+	c.SecretAccessKey = key
+	c.SessionToken = token
+}
+
+// Sets expiration. Accepts an offset to allow for early expiration. This helps
+// avoid returning credentials that expire "in flight."
+func (c *Credentials) SetExpiration(t time.Time, offset time.Duration) {
+	c.Expiration = t.Add(-offset)
+}
 
 // AssumeRoleClient is a basic interface that wraps role assumption.
 //
@@ -80,4 +107,54 @@ func (r *Role) Credentials() (Credentials, error) {
 	}
 
 	return r.creds, nil
+}
+
+// A collection of aliased roles.
+type RoleSet struct {
+	roles map[string]*Role
+
+	client AssumeRoleClient
+	m      sync.Mutex
+}
+
+func NewRoleSet(c AssumeRoleClient) *RoleSet {
+	return &RoleSet{
+		client: c,
+		roles:  make(map[string]*Role),
+	}
+}
+
+func (rc *RoleSet) Role(alias string) (*Role, error) {
+	rc.m.Lock()
+	defer rc.m.Unlock()
+
+	if role, ok := rc.roles[alias]; ok {
+		return role, nil
+	}
+
+	return &Role{}, fmt.Errorf("unknown role: %s", alias)
+}
+
+func (rc *RoleSet) Roles() (roles []string) {
+	rc.m.Lock()
+	defer rc.m.Unlock()
+
+	roles = make([]string, len(rc.roles))
+
+	i := 0
+	for k := range rc.roles {
+		roles[i] = k
+		i += 1
+	}
+
+	sort.Strings(roles)
+	return
+}
+
+// Set an alias's role configuration.
+func (rc *RoleSet) SetRole(alias, arn string) {
+	rc.m.Lock()
+	defer rc.m.Unlock()
+
+	rc.roles[alias] = NewRole(arn, fmt.Sprintf("finto-%s", alias), rc.client)
 }
