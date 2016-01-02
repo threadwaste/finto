@@ -49,11 +49,11 @@ type AssumeRoleClient interface {
 // Implements a role, the retrieval of its credentials, and management of their
 // expiration.
 type Role struct {
-	arn         string
-	creds       Credentials
-	sessionName string
+	arn         string      // The role's Amazon Resource Name
+	creds       Credentials // The role's credentials
+	sessionName string      // The session name recorded by assumption
 
-	client AssumeRoleClient
+	client AssumeRoleClient // An AssumeRoleClient for retrieving credentials
 	m      sync.Mutex
 }
 
