@@ -22,16 +22,12 @@ func setupTestRequest(m, p string, b io.Reader, t *testing.T) (*http.Request, *h
 	return req, rec
 }
 
-func setupTestFintoContext() (fc *fintoContext) {
+func setupTestFintoContext() (fc fintoContext) {
 	ts := NewRoleSet(&MockAssumeRoleClient{})
 	ts.SetRole("test-alias", "test-arn")
 	ts.SetRole("another-alias", "another-arn")
 
-	fc = &fintoContext{
-		set:          ts,
-		instanceRole: "test-alias",
-	}
-	fc.setInstanceRole("test-alias")
+	fc, _ = InitFintoContext(ts, "test-alias")
 
 	return
 }
@@ -139,7 +135,7 @@ func TestFintoHandlers(t *testing.T) {
 
 	for _, test := range cases {
 		fc := setupTestFintoContext()
-		router := FintoRouter(fc)
+		router := FintoRouter(&fc)
 
 		req, rec := setupTestRequest(test.method, test.path, test.body, t)
 		router.ServeHTTP(rec, req)
@@ -162,7 +158,7 @@ func TestMockInstanceRole(t *testing.T) {
 	)
 	fc := setupTestFintoContext()
 
-	FintoRouter(fc).ServeHTTP(rec, req)
+	FintoRouter(&fc).ServeHTTP(rec, req)
 
 	assert.Equal(t, "test-alias", rec.Body.String())
 }

@@ -14,10 +14,11 @@ type fintoContext struct {
 	instanceRole string
 }
 
-func InitFintoContext(rs *RoleSet) *fintoContext {
-	return &fintoContext{
-		set: rs,
-	}
+func InitFintoContext(rs *RoleSet, defrole string) (fintoContext, error) {
+	var fc = fintoContext{set: rs}
+	err := fc.setInstanceRole(defrole)
+
+	return fc, err
 }
 
 func (fc *fintoContext) setInstanceRole(role string) error {
