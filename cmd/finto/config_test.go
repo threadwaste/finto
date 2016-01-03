@@ -1,7 +1,6 @@
 package main
 
 import (
-	"fmt"
 	"io/ioutil"
 	"os"
 	"testing"
@@ -9,20 +8,17 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
-const configExample = `
-{
-
-	"credentials": {
-		"file": "a",
-		"profile": "a"
-	},
-	"default_role": "1",
-	"roles": {
-		"1": "arn",
-		"2": "arn"
-	}
-}
-`
+const configExample = `{
+  "default_role": "1",
+  "credentials": {
+    "file": "a",
+    "profile": "a"
+  },
+  "roles": {
+    "1": "arn",
+    "2": "arn"
+  }
+}`
 
 func setupConfigTests(t *testing.T) string {
 	f, err := ioutil.TempFile("", "config-test")
@@ -42,31 +38,20 @@ func teardownConfigTests(f string) {
 	_ = os.Remove(f)
 }
 
-func ExampleString() {
+func TestConfigFileStringer(t *testing.T) {
 	var c = Config{
-		DefaultRole: "alias",
+		DefaultRole: "1",
 		Credentials: CredentialsConfig{
-			File:    "File",
-			Profile: "ID",
+			File:    "a",
+			Profile: "a",
 		},
 		Roles: RolesConfig{
-			"alias": "arn",
+			"1": "arn",
+			"2": "arn",
 		},
 	}
 
-	fmt.Println(c.String())
-
-	// Output:
-	// {
-	//   "default_role": "alias",
-	//   "credentials": {
-	//     "file": "File",
-	//     "profile": "ID"
-	//   },
-	//   "roles": {
-	//     "alias": "arn"
-	//   }
-	// }
+	assert.Equal(t, configExample, c.String())
 }
 
 func TestLoadsConfigFile(t *testing.T) {
