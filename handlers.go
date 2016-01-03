@@ -3,6 +3,7 @@ package finto
 import (
 	"bytes"
 	"encoding/json"
+	"fmt"
 	"net/http"
 
 	"github.com/gorilla/mux"
@@ -22,8 +23,7 @@ func InitFintoContext(rs *RoleSet, defrole string) (fintoContext, error) {
 }
 
 func (fc *fintoContext) setInstanceRole(role string) error {
-	_, err := fc.set.Role(role)
-	if err != nil {
+	if _, err := fc.set.Role(role); err != nil {
 		return err
 	}
 
@@ -81,7 +81,8 @@ func rolesSetActive(fc *fintoContext) http.Handler {
 
 		decoder := json.NewDecoder(r.Body)
 		if err := decoder.Decode(&req); err != nil {
-			http.Error(w, err.Error(), http.StatusInternalServerError)
+			errorResponse(w, fmt.Sprint("failed to parse body: ", err),
+				http.StatusBadRequest)
 			return
 		}
 
@@ -106,13 +107,14 @@ func mockProfileCreds(fc *fintoContext) http.Handler {
 	return VarsHandlerFunc(func(w http.ResponseWriter, r *http.Request, vars map[string]string) {
 		role, err := fc.set.Role(vars["alias"])
 		if err != nil {
-			http.Error(w, err.Error(), http.StatusNotFound)
+			errorResponse(w, err.Error(), http.StatusNotFound)
 			return
 		}
 
 		creds, err := role.Credentials()
 		if err != nil {
-			http.Error(w, err.Error(), http.StatusInternalServerError)
+			errorResponse(w, fmt.Sprint("failed to assume role: ", err),
+				http.StatusInternalServerError)
 			return
 		}
 
@@ -127,7 +129,8 @@ func mockProfileCreds(fc *fintoContext) http.Handler {
 		})
 
 		if err != nil {
-			http.Error(w, err.Error(), http.StatusInternalServerError)
+			errorResponse(w, fmt.Sprint("failed to render: ", err),
+				http.StatusInternalServerError)
 			return
 		}
 

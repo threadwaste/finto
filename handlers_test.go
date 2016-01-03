@@ -83,6 +83,15 @@ func TestFintoHandlers(t *testing.T) {
 			},
 		},
 		{
+			"PUT",
+			"/roles",
+			bytes.NewBuffer([]byte(`"bad_json":"oh-me-oh-my"}`)),
+			http.StatusBadRequest,
+			map[string]interface{}{
+				"error": "failed to parse body: json: cannot unmarshal string into Go value of type finto.activateRequest",
+			},
+		},
+		{
 			"GET",
 			"/roles/test-alias",
 			nil,
@@ -118,6 +127,15 @@ func TestFintoHandlers(t *testing.T) {
 		},
 		{
 			"GET",
+			"/roles/missing-alias/credentials",
+			nil,
+			http.StatusNotFound,
+			map[string]interface{}{
+				"error": "unknown role: missing-alias",
+			},
+		},
+		{
+			"GET",
 			"/latest/meta-data/iam/security-credentials/test-alias",
 			nil,
 			http.StatusOK,
@@ -129,6 +147,15 @@ func TestFintoHandlers(t *testing.T) {
 				"SecretAccessKey": "mock-key",
 				"Token":           "mock-token",
 				"Expiration":      me.Format("2006-01-02T15:04:05Z"),
+			},
+		},
+		{
+			"GET",
+			"/latest/meta-data/iam/security-credentials/missing-alias",
+			nil,
+			http.StatusNotFound,
+			map[string]interface{}{
+				"error": "unknown role: missing-alias",
 			},
 		},
 	}
