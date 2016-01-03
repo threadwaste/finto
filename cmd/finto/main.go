@@ -17,7 +17,7 @@ import (
 var (
 	fintorc = flag.String("config", defaultRC(), "location of config file")
 
-	addr    = flag.String("addr", "169.254.169.254", "bind to addr")
+	addr = flag.String("addr", "169.254.169.254", "bind to addr")
 	// TODO: logging for both main and handlers
 	logfile = flag.String("log", "", "log to file")
 	port    = flag.Uint("port", 16925, "listen on port")
