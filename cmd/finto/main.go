@@ -4,6 +4,7 @@ import (
 	"flag"
 	"fmt"
 	"net/http"
+	"os"
 	"os/user"
 	"path/filepath"
 
@@ -11,20 +12,26 @@ import (
 	"github.com/aws/aws-sdk-go/aws/credentials"
 	"github.com/aws/aws-sdk-go/aws/session"
 	"github.com/aws/aws-sdk-go/service/sts"
+	"github.com/gorilla/handlers"
 	"github.com/threadwaste/finto"
 )
 
 var (
 	fintorc = flag.String("config", defaultRC(), "location of config file")
 
-	addr = flag.String("addr", "169.254.169.254", "bind to addr")
-	// TODO: logging for both main and handlers
-	logfile = flag.String("log", "", "log to file")
+	addr    = flag.String("addr", "169.254.169.254", "bind to addr")
+	logfile = flag.String("log", "", "log http to file")
 	port    = flag.Uint("port", 16925, "listen on port")
 )
 
 func main() {
 	flag.Parse()
+
+	logdest, err := prepareLog(*logfile)
+	if err != nil {
+		panic(err)
+	}
+	defer logdest.Close()
 
 	config, err := LoadConfig(*fintorc)
 	if err != nil {
@@ -47,11 +54,12 @@ func main() {
 
 	context, err := finto.InitFintoContext(rs, config.DefaultRole)
 	if err != nil {
-		fmt.Printf("initializing: %s\n", err)
+		fmt.Println("warning: default role not set:", err)
 	}
 
 	router := finto.FintoRouter(&context)
-	err = http.ListenAndServe(fmt.Sprint(*addr, ":", *port), router)
+	handler := handlers.LoggingHandler(logdest, router)
+	err = http.ListenAndServe(fmt.Sprint(*addr, ":", *port), handler)
 	if err != nil {
 		panic(err)
 	}
@@ -73,4 +81,12 @@ func defaultRC() string {
 	}
 
 	return filepath.Join(dir, ".fintorc")
+}
+
+func prepareLog(filename string) (*os.File, error) {
+	if filename != "" {
+		return os.OpenFile(filename, os.O_CREATE|os.O_APPEND|os.O_WRONLY, 0600)
+	}
+
+	return os.Stdout, nil
 }
