@@ -1,7 +1,6 @@
 package finto
 
 import (
-	"bytes"
 	"encoding/json"
 	"fmt"
 	"net/http"
@@ -118,7 +117,10 @@ func mockProfileCreds(fc *fintoContext) http.Handler {
 			return
 		}
 
-		b, err := json.Marshal(map[string]string{
+		// There's technically no reason to pretty print here, but do so to
+		// maintain parity in the mock service. Uses MarshalIndent as
+		// Encoder.Encode does not offer a means to do so.
+		b, err := json.MarshalIndent(map[string]string{
 			"Code":            "Success",
 			"LastUpdated":     "2015-07-07T23:06:33Z",
 			"Type":            "AWS-HMAC",
@@ -126,7 +128,7 @@ func mockProfileCreds(fc *fintoContext) http.Handler {
 			"SecretAccessKey": creds.SecretAccessKey,
 			"Token":           creds.SessionToken,
 			"Expiration":      creds.Expiration.Format("2006-01-02T15:04:05Z"),
-		})
+		}, "", "  ")
 
 		if err != nil {
 			errorResponse(w, fmt.Sprint("failed to render: ", err),
@@ -134,10 +136,7 @@ func mockProfileCreds(fc *fintoContext) http.Handler {
 			return
 		}
 
-		var o bytes.Buffer
-		json.Indent(&o, b, "", "  ")
-
-		o.WriteTo(w)
+		w.Write(b)
 	})
 }
 
