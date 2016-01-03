@@ -42,7 +42,7 @@ func teardownConfigTests(f string) {
 	_ = os.Remove(f)
 }
 
-func ExampleStringRendering() {
+func ExampleString() {
 	var c = Config{
 		DefaultRole: "alias",
 		Credentials: CredentialsConfig{
