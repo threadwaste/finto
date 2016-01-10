@@ -33,8 +33,7 @@ roles](http://docs.aws.amazon.com/AWSEC2/latest/UserGuide/iam-roles-for-amazon-e
 
 Below is sample output of finto serving credentials to the AWS CLI:
 
-    ~
-    ❯ aws s3 ls --debug
+    $ aws s3 ls --debug
     <truncated>
     2016-01-03 11:52:01,895 - MainThread - botocore.credentials - DEBUG - Looking for credentials via: env
     2016-01-03 11:52:01,895 - MainThread - botocore.credentials - DEBUG - Looking for credentials via: assume-role
@@ -54,14 +53,11 @@ Below is sample output of finto serving credentials to the AWS CLI:
 finto also includes an API for bouncing between available roles. Helper
 functions for bash and fish shells are available.
 
-    ~
-    ❯ curl 169.254.169.254/roles
+    $ curl 169.254.169.254/roles
     {"roles":["example","example2"]}
-    ~
-    ❯ curl 169.254.169.254/roles/example
+    $ curl 169.254.169.254/roles/example
     {"arn":"arn:aws:iam::123456789012:role/example","session_name":"finto-example"}
-    ~
-    ❯ curl 169.254.169.254/roles/example/credentials
+    $ curl 169.254.169.254/roles/example/credentials
     {
       "AccessKeyId": "<redacted>",
       "Code": "Success",
@@ -71,14 +67,11 @@ functions for bash and fish shells are available.
       "Token": "<redacted>",
       "Type": "AWS-HMAC"
     }
-    ~
-    ❯ curl 169.254.169.254/latest/meta-data/iam/security-credentials/
+    $ curl 169.254.169.254/latest/meta-data/iam/security-credentials/
     example
-    ~
-    ❯ curl -XPUT -d'{"alias":"example2"}' 169.254.169.254/roles
+    $ curl -XPUT -d'{"alias":"example2"}' 169.254.169.254/roles
     {"active_role":"example2"}
-    ~
-    ❯ curl 169.254.169.254/latest/meta-data/iam/security-credentials/
+    $ curl 169.254.169.254/latest/meta-data/iam/security-credentials/
     example2
 
 ## Configuration
@@ -115,3 +108,17 @@ The second is client-dependent. In the case of clients like the AWS CLI, the
 user must clear a path to the EC2 instance profile provider. Multiple shared
 credentials profiles can still be configured, and accessed with e.g. the
 --profile option or AWS_DEFAULT_PROFILE environment variable.
+
+## Development
+
+After cloning the repository, running `make` will fetch and build
+dependencies; run tests; and install the binary. During development, `make
+testall` requires the following environment variables for its integration tests:
+
++ AWS_ACCESS_KEY_ID
++ AWS_SECRET_ACCESS_KEY
++ FINTO_VALID_ARN - an IAM role ARN that can be assumed
++ FINTO_INVALID_ARN - a false IAM role ARN that will fail
+
+The target `test` can be used to skip the integration tests, and avoid this
+setup.

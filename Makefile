@@ -2,7 +2,7 @@ SHELL := /bin/bash
 
 .DEFAULT: default
 
-all: deps build fmt test vet install
+all: deps build fmt vet test install
 
 build:
 	go build -a -v ./...
@@ -18,6 +18,9 @@ install:
 
 test:
 	go test -v ./...
+
+testall:
+	go test -v -tags integration ./...
 
 vet:
 	go vet ./...

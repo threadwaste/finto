@@ -8,4 +8,7 @@ install:
   - go get golang.org/x/tools/cmd/vet
   - make deps
 script:
-  - make fmt vet test
+  - >
+    [ "${TRAVIS_PULL_REQUEST}" = "false" ]
+    && make fmt vet testall
+    || make fmt vet test
