@@ -22,10 +22,17 @@ var (
 	addr    = flag.String("addr", "169.254.169.254", "bind to addr")
 	logfile = flag.String("log", "", "log http to file")
 	port    = flag.Uint("port", 16925, "listen on port")
+
+	printver = flag.Bool("version", false, "print version")
 )
 
 func main() {
 	flag.Parse()
+
+	if *printver {
+		fmt.Println("finto", finto.Version)
+		os.Exit(0)
+	}
 
 	logdest, err := prepareLog(*logfile)
 	if err != nil {
@@ -40,14 +47,13 @@ func main() {
 
 	// SharedCredentialsProvider defaults to file=~/.aws/credentials and
 	// profile=default when provided zero-value strings
-	stsClient := sts.New(session.New(), &aws.Config{
+	rs := finto.NewRoleSet(sts.New(session.New(), &aws.Config{
 		Credentials: credentials.NewSharedCredentials(
 			config.Credentials.File,
 			config.Credentials.Profile,
 		),
-	})
+	}))
 
-	rs := finto.NewRoleSet(stsClient)
 	for alias, arn := range config.Roles {
 		rs.SetRole(alias, arn)
 	}
