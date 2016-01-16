@@ -57,7 +57,7 @@ var routes = Routes{
 }
 
 func FintoRouter(fc *fintoContext) *mux.Router {
-	router := mux.NewRouter()
+	router := mux.NewRouter().StrictSlash(true)
 
 	for _, route := range routes {
 		router.
