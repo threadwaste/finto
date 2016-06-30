@@ -142,6 +142,7 @@ func mockProfileCreds(fc *fintoContext) http.Handler {
 
 func jsonResponse(w http.ResponseWriter, body interface{}) {
 	w.Header().Set("Content-Type", "application/json; charset=UTF-8")
+	w.Header().Set("Server", "EC2ws")
 	json.NewEncoder(w).Encode(body)
 }
 
