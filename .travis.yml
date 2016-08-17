@@ -1,8 +1,6 @@
 language: go
 sudo: false
 go:
-  - 1.6
-install:
-  - make deps
+  - 1.7
 script:
   - make fmt vet test
