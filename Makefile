@@ -1,26 +1,25 @@
-SHELL := /bin/bash
+SHELL = /bin/bash
 
-.DEFAULT: default
+FINTO_ROOT=github.com/threadwaste/finto
+FINTO_PACKAGES=${FINTO_ROOT} ${FINTO_ROOT}/cmd/finto
+FINTO_NOVENDOR=$(shell find . -type f -name \*.go -not -path ./vendor/\*)
 
-all: deps build fmt vet test install
+all: build fmt vet test install
 
 build:
 	go build -a -v ./...
 
-deps:
-	go get -t -v ./...
-
 fmt:
-	diff -u <(echo -n) <(gofmt -s -d .)
+	diff -u <(echo -n) <(gofmt -s -d ${FINTO_NOVENDOR})
 
 install:
 	go install -v .
 
 test:
-	go test -v ./...
+	go test -v ${FINTO_PACKAGES}
 
 testall:
-	go test -v -tags integration ./...
+	go test -v -tags integration ${FINTO_PACKAGES}
 
 vet:
-	go vet ./...
+	go vet -x ${FINTO_PACKAGES}
