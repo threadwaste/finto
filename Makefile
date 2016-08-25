@@ -25,7 +25,7 @@ build:
 	go build -a -v ${FINTO_MAIN}
 
 deps: glide ${FINTO_NOVENDOR}
-	glide install
+	@PATH=${BUILD_BIN}/${GOOS}-${GOARCH}:${PATH} glide install
 
 fmt:
 	diff -u <(echo -n) <(gofmt -s -d ${FINTO_NOVENDOR})
