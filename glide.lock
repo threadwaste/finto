@@ -1,8 +1,8 @@
 hash: 1610798b3edba8cc518eaca63fd15a029a3831795a06f61cf492049d841a65cd
-updated: 2016-08-17T17:52:30.492626283-04:00
+updated: 2016-08-25T09:54:47.438325712-04:00
 imports:
 - name: github.com/aws/aws-sdk-go
-  version: 35c21ff262580265c1d77095d6f712605fd0c3f4
+  version: 41d27747f314ab5d608a470e23f1d92bd5249b0c
   subpackages:
   - aws
   - aws/credentials
