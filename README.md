@@ -16,7 +16,7 @@ caching and expiration.
 
 At its simplest:
 
-    go get github.com/threadwaste/finto
+    go get github.com/threadwaste/finto/cmd/finto
 
 ## Usage
 

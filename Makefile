@@ -1,24 +1,41 @@
 SHELL = /bin/bash
 
-FINTO_ROOT=github.com/threadwaste/finto
-FINTO_PACKAGES=${FINTO_ROOT} ${FINTO_ROOT}/cmd/finto
-FINTO_NOVENDOR=$(shell find . -type f -name \*.go -not -path ./vendor/\*)
+BUILD_BIN=_build_bin
 
-all: build fmt vet test install
+GOVERSION:=$(shell go version)
+GOOS=$(word 1,$(subst /, , $(lastword ${GOVERSION})))
+GOARCH=$(word 2,$(subst /, , $(lastword ${GOVERSION})))
+
+FINTO_ROOT=github.com/threadwaste/finto
+FINTO_MAIN=${FINTO_ROOT}/cmd/finto
+FINTO_PACKAGES=${FINTO_ROOT} ${FINTO_MAIN}
+FINTO_NOVENDOR:=$(shell find . -type f -name \*.go -not -path ./vendor/\*)
+
+HAVE_GLIDE:=$(shell which glide)
+
+.PHONY: build fmt vet
+
+${BUILD_BIN}/glide:
+ifndef HAVE_GLIDE
+	@mkdir -vp ${BUILD_BIN}
+	@curl -vL https://github.com/Masterminds/glide/releases/download/v0.12.0/glide-v0.12.0-${GOOS}-${GOARCH}.tar.gz | tar zxv -C ${BUILD_BIN}
+endif
 
 build:
-	go build -a -v ./...
+	go build -a -v ${FINTO_MAIN}
+
+deps: glide ${FINTO_NOVENDOR}
+	glide install
 
 fmt:
 	diff -u <(echo -n) <(gofmt -s -d ${FINTO_NOVENDOR})
 
-install:
-	go install -v .
+glide: ${BUILD_BIN}/glide
 
-test:
+test: deps
 	go test -v ${FINTO_PACKAGES}
 
-testall:
+testall: deps
 	go test -v -tags integration ${FINTO_PACKAGES}
 
 vet:
