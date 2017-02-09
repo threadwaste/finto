@@ -4,6 +4,8 @@
 
 **finto (-a)** /'finto (-a)/ *agg* **1** posticcio; artificiàle
 
+ ![roar](http://i.imgur.com/06wtWA1.jpg)
+
 ## Overview
 
 finto is a web server that emulates EC2 instance profile roles on a workstation
